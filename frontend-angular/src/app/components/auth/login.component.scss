@@ -32,7 +32,8 @@
 }
 
 .logo-icon {
-  font-size: 2.5rem;
+  width: 48px;
+  height: 48px;
 }
 
 .logo h1 {
@@ -142,7 +143,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .divider {
