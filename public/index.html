@@ -55,9 +55,33 @@
             font-weight: 800;
             background: linear-gradient(to right, var(--primary), #ec4899);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             cursor: pointer;
             letter-spacing: -1px;
+        }
+
+        .auth-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-pill img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
         }
 
         /* Hero */
@@ -76,6 +100,7 @@
         .hero .gradient {
             background: linear-gradient(to right, #a855f7, #6366f1);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -353,7 +378,10 @@
     <div class="container">
         <nav>
             <div class="logo" onclick="location.reload()">✨ Scholar AI</div>
-            <div id="nav-info"></div>
+            <div class="auth-controls" id="auth-ui">
+                <button class="btn" style="padding: 0.6rem 1.2rem; font-size: 0.9rem;" onclick="login()">Sign In with
+                    Google</button>
+            </div>
         </nav>
 
         <!-- Home -->
@@ -446,10 +474,55 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
     <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDb7ny0NMBmrA0Sv_SDHwifRlOz1_rOy9g",
+            authDomain: "medkey-vault.firebaseapp.com",
+            projectId: "medkey-vault",
+            storageBucket: "medkey-vault.firebasestorage.app",
+            messagingSenderId: "978355602312",
+            appId: "1:978355602312:web:25ef0c5ab1119f5018b03d"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        let currentUser = null;
         let guide = null;
         let cardIdx = 0;
         let isFlipped = false;
+
+        // Auth Observer
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            const ui = document.getElementById('auth-ui');
+            if (user) {
+                ui.innerHTML = `
+                    <div class="user-pill">
+                        <img src="${user.photoURL}" alt="User">
+                        <span>${user.displayName}</span>
+                    </div>
+                    <button class="btn" style="padding: 0.6rem 1.2rem; font-size: 0.9rem; background: transparent; border: 1px solid var(--border);" onclick="logout()">Logout</button>
+                `;
+                initRecent();
+            } else {
+                ui.innerHTML = `<button class="btn" style="padding: 0.6rem 1.2rem; font-size: 0.9rem;" onclick="login()">Sign In with Google</button>`;
+                document.getElementById('recent-list').innerHTML = '';
+            }
+        });
+
+        async function login() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            await auth.signInWithPopup(provider);
+        }
+
+        async function logout() {
+            await auth.signOut();
+        }
 
         function handleFile(input) {
             if (input.files[0]) {
@@ -458,6 +531,7 @@
         }
 
         async function generate() {
+            if (!currentUser) return alert("Please Sign In first to generate a study guide!");
             const file = document.getElementById('file-input').files[0];
             if (!file) return alert("Please select a file first!");
 
@@ -467,6 +541,7 @@
             fd.append('difficulty', document.getElementById('difficulty').value);
             fd.append('exam_date', document.getElementById('exam-date').value);
             fd.append('api_key', document.getElementById('api-key').value);
+            fd.append('user_id', currentUser.uid);
 
             document.getElementById('loader').style.display = 'flex';
 

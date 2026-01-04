@@ -2,7 +2,7 @@
   "name": "backend-node",
   "version": "1.0.0",
   "description": "",
-  "main": "scholar_ai.js",
+  "main": "api/index.js",
   "scripts": {
     "start": "node scholar_ai.js",
     "test": "echo \"Error: no test specified\" && exit 1"
