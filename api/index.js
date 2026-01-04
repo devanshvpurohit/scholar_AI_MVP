@@ -134,8 +134,20 @@ async function promptEverything(transcript, goals, difficulty, examDate, apiKey)
     `;
     // Truncate transcript to avoid limits if necessary, though 2.0 Flash has large context.
 
+    let result;
     try {
-        const result = await model.generateContent(prompt);
+        try {
+            result = await model.generateContent(prompt);
+        } catch (err) {
+            if (err.message.includes("404") || err.message.includes("not found")) {
+                console.warn("gemini-1.5-flash not found, falling back to gemini-pro");
+                const fallbackModel = genAI.getGenerativeModel({ model: "gemini-pro" });
+                result = await fallbackModel.generateContent(prompt);
+            } else {
+                throw err;
+            }
+        }
+
         const response = await result.response;
         const text = response.text();
 
