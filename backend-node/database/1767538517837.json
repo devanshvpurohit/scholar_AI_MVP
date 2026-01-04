@@ -1,0 +1,395 @@
+{
+  "title": "Machine Learning Algorithms: Intermediate Mastery Plan",
+  "summary": "This study plan is designed to guide you through the Machine Learning Algorithms course at an intermediate level. It covers fundamental concepts, supervised and unsupervised learning, dimensionality reduction, and advanced topics. The schedule is structured day-by-day, incorporating spaced repetition for key concepts and providing practical study tips. The goal is to build a solid understanding and practical ability in applying various machine learning techniques.",
+  "topics": [
+    {
+      "name": "Introduction to Machine Learning",
+      "difficulty": "Easy"
+    },
+    {
+      "name": "Supervised Learning Fundamentals (Perceptrons, Linear Regression)",
+      "difficulty": "Medium"
+    },
+    {
+      "name": "Concept Learning and Version Spaces",
+      "difficulty": "Medium"
+    },
+    {
+      "name": "Multi-Layer Perceptrons (MLPs)",
+      "difficulty": "Hard"
+    },
+    {
+      "name": "Backpropagation Algorithm",
+      "difficulty": "Hard"
+    },
+    {
+      "name": "Radial Basis Function (RBF) Networks",
+      "difficulty": "Medium"
+    },
+    {
+      "name": "Support Vector Machines (SVMs)",
+      "difficulty": "Hard"
+    },
+    {
+      "name": "Decision Trees",
+      "difficulty": "Medium"
+    },
+    {
+      "name": "Ensemble Learning (Bagging, Boosting)",
+      "difficulty": "Hard"
+    },
+    {
+      "name": "Clustering (K-Means)",
+      "difficulty": "Medium"
+    },
+    {
+      "name": "Dimensionality Reduction (PCA, LDA)",
+      "difficulty": "Hard"
+    },
+    {
+      "name": "Independent Component Analysis (ICA)",
+      "difficulty": "Medium"
+    },
+    {
+      "name": "Genetic Algorithms (GAs)",
+      "difficulty": "Hard"
+    },
+    {
+      "name": "Time Series Forecasting (ARIMA)",
+      "difficulty": "Medium"
+    },
+    {
+      "name": "Recommender Systems (Collaborative Filtering)",
+      "difficulty": "Medium"
+    },
+    {
+      "name": "Sentiment Analysis",
+      "difficulty": "Medium"
+    },
+    {
+      "name": "Association Rule Mining (Apriori)",
+      "difficulty": "Medium"
+    }
+  ],
+  "study_tips": [
+    "Focus on understanding the mathematical intuition behind algorithms before diving into implementation details.",
+    "Practice implementing algorithms from scratch using pseudocode or simplified examples to solidify understanding.",
+    "Relate theoretical concepts to real-world applications whenever possible to improve comprehension and retention.",
+    "Actively engage with the problem-solving questions. Try to sketch out solutions or algorithms before reading the detailed explanations.",
+    "For complex topics like Backpropagation and SVMs, break them down into smaller, manageable steps.",
+    "Use visualization tools to understand concepts like decision boundaries, principal components, and clustering.",
+    "When encountering formulas, try to derive them or understand the derivation process rather than just memorizing.",
+    "Formulate your own questions based on the material to test your understanding.",
+    "Collaborate with peers if possible, discussing challenging topics can lead to deeper insights.",
+    "Review past mistakes in problem-solving to avoid repeating them."
+  ],
+  "flash_cards": [
+    [
+      "What is the main difference between supervised and unsupervised learning?",
+      "Supervised learning uses labeled data to train models for prediction or classification, while unsupervised learning uses unlabeled data to find patterns or structures."
+    ],
+    [
+      "What is the purpose of an activation function in an MLP?",
+      "Activation functions introduce non-linearity into the network, allowing MLPs to learn complex patterns that linear models cannot."
+    ],
+    [
+      "What does PCA aim to achieve?",
+      "PCA aims to reduce the dimensionality of a dataset by transforming features into a new set of uncorrelated components (principal components) that capture the maximum variance."
+    ],
+    [
+      "What is the primary goal of Support Vector Machines (SVMs)?",
+      "SVMs aim to find the optimal hyperplane that best separates data points of different classes with the maximum margin."
+    ],
+    [
+      "What is the 'curse of dimensionality'?",
+      "The curse of dimensionality refers to various phenomena that arise when analyzing and organizing data in high-dimensional spaces, which do not occur in low-dimensional settings. This can lead to increased computational cost and reduced model performance."
+    ],
+    [
+      "What is the role of a loss function in MLP training?",
+      "The loss function quantifies the error between the predicted output and the actual target, guiding the backpropagation algorithm to adjust weights and minimize this error."
+    ],
+    [
+      "What is the main difference between bagging and boosting?",
+      "Bagging (e.g., Random Forest) builds multiple models independently on bootstrap samples of the data and averages their predictions. Boosting (e.g., AdaBoost) builds models sequentially, with each new model focusing on correcting the errors of the previous ones."
+    ]
+  ],
+  "quiz": [
+    {
+      "question": "Which algorithm is used to find the optimal hyperplane that maximizes the margin between classes?",
+      "possible_answers": [
+        "Decision Tree",
+        "K-Means Clustering",
+        "Support Vector Machine (SVM)",
+        "Principal Component Analysis (PCA)"
+      ],
+      "index": 0,
+      "related_topic": "Support Vector Machines (SVMs)"
+    },
+    {
+      "question": "What is the primary purpose of backpropagation in a Multi-Layer Perceptron?",
+      "possible_answers": [
+        "To introduce non-linearity",
+        "To compute the output of the network",
+        "To adjust weights and biases to minimize error",
+        "To select features for the model"
+      ],
+      "index": 0,
+      "related_topic": "Backpropagation Algorithm"
+    },
+    {
+      "question": "Which dimensionality reduction technique aims to maximize the variance captured by the new components?",
+      "possible_answers": [
+        "Linear Discriminant Analysis (LDA)",
+        "Principal Component Analysis (PCA)",
+        "Independent Component Analysis (ICA)",
+        "K-Means Clustering"
+      ],
+      "index": 0,
+      "related_topic": "Dimensionality Reduction (PCA, LDA)"
+    },
+    {
+      "question": "In ensemble learning, what is the main difference between Bagging and Boosting?",
+      "possible_answers": [
+        "Bagging reduces bias, Boosting reduces variance.",
+        "Bagging trains models in parallel, Boosting trains models sequentially.",
+        "Bagging uses random subsets of features, Boosting uses random subsets of data.",
+        "Bagging is used for regression, Boosting for classification."
+      ],
+      "index": 1,
+      "related_topic": "Ensemble Learning (Bagging, Boosting)"
+    },
+    {
+      "question": "Which clustering algorithm groups data points into 'k' clusters based on minimizing the distance to cluster centroids?",
+      "possible_answers": [
+        "Hierarchical Clustering",
+        "DBSCAN",
+        "K-Means Clustering",
+        "Gaussian Mixture Models (GMM)"
+      ],
+      "index": 0,
+      "related_topic": "Clustering (K-Means)"
+    }
+  ],
+  "study_schedule": [
+    {
+      "day_offset": 1,
+      "title": "Module I: Introduction to ML & Supervised Learning Basics",
+      "details": "Cover 'Introduction to Machine Learning' (types, concepts) and start with 'Supervised Learning Fundamentals'. Focus on perceptrons and the basic idea of linear regression. Read relevant sections, understand definitions.",
+      "duration_minutes": 60,
+      "type": "learning",
+      "difficulty": "Easy",
+      "completed": false
+    },
+    {
+      "day_offset": 2,
+      "title": "Module I: Linear Regression and Concept Learning",
+      "details": "Deep dive into Linear Regression (modeling, assumptions, evaluation) and Concept Learning (Candidate Elimination Algorithm, version spaces). Work through examples Q5-Q10 from Part A (Module I).",
+      "duration_minutes": 75,
+      "type": "learning",
+      "difficulty": "Medium",
+      "completed": false
+    },
+    {
+      "day_offset": 3,
+      "title": "Module I: Review & Practice",
+      "details": "Review all concepts from Module I. Solve Part B and Part C questions. Focus on understanding the 'why' behind each concept and its application.",
+      "duration_minutes": 60,
+      "type": "review",
+      "difficulty": "Medium",
+      "completed": false
+    },
+    {
+      "day_offset": 4,
+      "title": "Module II: Multi-Layer Perceptrons (MLPs)",
+      "details": "Study the architecture of MLPs, activation functions, and the role of hidden layers. Read 'Multi-Layer Perceptron' sections. Understand Part B Q1-Q7.",
+      "duration_minutes": 75,
+      "type": "learning",
+      "difficulty": "Hard",
+      "completed": false
+    },
+    {
+      "day_offset": 5,
+      "title": "Module II: Backpropagation & Gradient Descent",
+      "details": "Focus on the Backpropagation algorithm: forward pass, backward pass, weight updates, and gradient descent. Understand the challenges like vanishing gradients. Work through Part B Q3, Q4, Q9, Q10.",
+      "duration_minutes": 90,
+      "type": "learning",
+      "difficulty": "Hard",
+      "completed": false
+    },
+    {
+      "day_offset": 6,
+      "title": "Module II: SVMs and RBF Networks",
+      "details": "Study Support Vector Machines (SVMs) - optimal hyperplane, margins, support vectors. Also, cover Radial Basis Function (RBF) networks. Solve Part A Q7-Q10 for SVMs.",
+      "duration_minutes": 75,
+      "type": "learning",
+      "difficulty": "Hard",
+      "completed": false
+    },
+    {
+      "day_offset": 7,
+      "title": "Module II: Review & Practice",
+      "details": "Review all concepts from Module II. Solve Part C questions. Focus on comparing MLP, RBF, and SVMs. Practice problem-solving for SVMs.",
+      "duration_minutes": 60,
+      "type": "review",
+      "difficulty": "Medium",
+      "completed": false
+    },
+    {
+      "day_offset": 8,
+      "title": "Module III: Decision Trees",
+      "details": "Learn about decision trees: construction, splitting criteria (entropy, Gini index), overfitting, and pruning. Study Part A Q1, Q9 and Part B Q1-Q6.",
+      "duration_minutes": 75,
+      "type": "learning",
+      "difficulty": "Medium",
+      "completed": false
+    },
+    {
+      "day_offset": 9,
+      "title": "Module III: Ensemble Learning",
+      "details": "Focus on ensemble methods: Bagging (Random Forests) and Boosting (AdaBoost). Understand their principles, differences, and applications. Study Part A Q2-Q4.",
+      "duration_minutes": 75,
+      "type": "learning",
+      "difficulty": "Hard",
+      "completed": false
+    },
+    {
+      "day_offset": 10,
+      "title": "Module III: Clustering (K-Means) & KNN",
+      "details": "Study K-Means clustering algorithm in detail, including centroid updates and choosing 'k'. Also, cover K-Nearest Neighbors (KNN). Solve Part A Q5-Q8 for K-Means and Q10 for KNN.",
+      "duration_minutes": 75,
+      "type": "learning",
+      "difficulty": "Medium",
+      "completed": false
+    },
+    {
+      "day_offset": 11,
+      "title": "Module III: Review & Practice",
+      "details": "Review all concepts from Module III. Solve Part C questions. Compare Decision Trees, Ensemble Methods, K-Means, and KNN. Practice K-Means clustering problems.",
+      "duration_minutes": 60,
+      "type": "review",
+      "difficulty": "Medium",
+      "completed": false
+    },
+    {
+      "day_offset": 12,
+      "title": "Module IV: Dimensionality Reduction (PCA)",
+      "details": "Focus on Principal Component Analysis (PCA): concept, mathematical steps (covariance matrix, eigenvalues, eigenvectors), and application. Study Part A Q1, Q2, Q5.",
+      "duration_minutes": 75,
+      "type": "learning",
+      "difficulty": "Hard",
+      "completed": false
+    },
+    {
+      "day_offset": 13,
+      "title": "Module IV: Dimensionality Reduction (LDA) & GAs",
+      "details": "Study Linear Discriminant Analysis (LDA) and compare it with PCA. Learn about Genetic Algorithms (GAs) for feature selection/optimization. Study Part A Q3, Q4, Q6, Q7, Q8.",
+      "duration_minutes": 75,
+      "type": "learning",
+      "difficulty": "Hard",
+      "completed": false
+    },
+    {
+      "day_offset": 14,
+      "title": "Module IV: Non-linear Reduction & Review",
+      "details": "Briefly cover non-linear techniques (Isomap, LLE) if time permits. Review PCA, LDA, and GAs. Solve Part B & C questions from Module IV.",
+      "duration_minutes": 60,
+      "type": "review",
+      "difficulty": "Medium",
+      "completed": false
+    },
+    {
+      "day_offset": 15,
+      "title": "Module V: Time Series & Recommender Systems",
+      "details": "Study Time Series Forecasting (ARIMA limitations, alternatives like LSTM/Prophet) and Recommender Systems (Collaborative Filtering, filter bubbles). Focus on Part A Q1, Q2, Q4.",
+      "duration_minutes": 75,
+      "type": "learning",
+      "difficulty": "Medium",
+      "completed": false
+    },
+    {
+      "day_offset": 16,
+      "title": "Module V: Sentiment Analysis & Association Rules",
+      "details": "Learn about Sentiment Analysis evaluation metrics (accuracy vs. F1, precision, recall) and Association Rule Mining (Apriori algorithm). Study Part A Q3, Q5, Q6.",
+      "duration_minutes": 75,
+      "type": "learning",
+      "difficulty": "Medium",
+      "completed": false
+    },
+    {
+      "day_offset": 17,
+      "title": "Module V: Review & Case Studies",
+      "details": "Review all concepts from Module V. Look at the course objectives and outcomes and see how they are addressed. Solve any remaining Part B/C questions.",
+      "duration_minutes": 60,
+      "type": "review",
+      "difficulty": "Medium",
+      "completed": false
+    },
+    {
+      "day_offset": 18,
+      "title": "Comprehensive Review - Module I & II",
+      "details": "Review all topics from Modules I and II. Focus on supervised learning, perceptrons, MLPs, backpropagation, and SVMs. Redo challenging problems.",
+      "duration_minutes": 90,
+      "type": "revision",
+      "difficulty": "Hard",
+      "completed": false
+    },
+    {
+      "day_offset": 19,
+      "title": "Comprehensive Review - Module III & IV",
+      "details": "Review topics from Modules III and IV: Decision Trees, Ensemble Learning, Clustering, Dimensionality Reduction (PCA, LDA), Genetic Algorithms. Redo challenging problems.",
+      "duration_minutes": 90,
+      "type": "revision",
+      "difficulty": "Hard",
+      "completed": false
+    },
+    {
+      "day_offset": 20,
+      "title": "Comprehensive Review - Module V & Mixed Concepts",
+      "details": "Review topics from Module V: Advanced Topics and Use Cases. Also, revisit any concepts from previous modules that still seem unclear. Practice mixed problems.",
+      "duration_minutes": 75,
+      "type": "revision",
+      "difficulty": "Medium",
+      "completed": false
+    },
+    {
+      "day_offset": 21,
+      "title": "Mock Exam / Practice Test",
+      "details": "Take a mock exam or work through a comprehensive set of practice questions covering all modules. Simulate exam conditions.",
+      "duration_minutes": 120,
+      "type": "assessment",
+      "difficulty": "Intermediate",
+      "completed": false
+    },
+    {
+      "day_offset": 22,
+      "title": "Review Mock Exam Results",
+      "details": "Analyze the results of the mock exam. Identify weak areas and review those specific topics and problems.",
+      "duration_minutes": 60,
+      "type": "review",
+      "difficulty": "Medium",
+      "completed": false
+    },
+    {
+      "day_offset": 23,
+      "title": "Final Revision - Key Concepts & Formulas",
+      "details": "Quickly review key definitions, formulas, and algorithms. Focus on high-level understanding and problem-solving strategies.",
+      "duration_minutes": 45,
+      "type": "revision",
+      "difficulty": "Easy",
+      "completed": false
+    },
+    {
+      "day_offset": 24,
+      "title": "Rest and Light Review",
+      "details": "Get adequate rest. Optionally, do a very light review of notes or flashcards.",
+      "duration_minutes": 30,
+      "type": "rest",
+      "difficulty": "Easy",
+      "completed": false
+    }
+  ],
+  "id": "1767538517837",
+  "created_at": 1767538517837,
+  "filename": "ACAD06MLAQB.pdf",
+  "goals": ""
+}
