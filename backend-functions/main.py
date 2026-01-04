@@ -13,6 +13,11 @@ import tempfile
 import time
 from werkzeug.utils import secure_filename
 import google.generativeai as genai
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 from google.oauth2 import service_account
 from google.cloud import speech, storage
 import firebase_admin
@@ -61,8 +66,8 @@ except Exception as e:
 logger.info("Firebase Init Step Complete")
 
 # Configure Gemini API
-USER_GEMINI_API_KEY = "AIzaSyCMbDpybbi30oHf1sLHGD0dO2DIt0fagrI"
-DEFAULT_GEMINI_KEY = os.environ.get("GEMINI_API_KEY", USER_GEMINI_API_KEY)
+# Keys should be placed in backend-functions/.env file
+DEFAULT_GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
 
 def get_gemini_key(request=None):
     """Get Gemini API key from request header or fallback"""
