@@ -94,8 +94,9 @@ async function extractTextFromFile(filePath, originalFilename, mimeType) {
 
 async function promptEverything(transcript, goals, difficulty, examDate, apiKey) {
     const genAI = new GoogleGenerativeAI(apiKey);
+    // Use the latest 2.0 Flash Experimental model
     const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.0-flash-exp",
         generationConfig: { responseMimeType: "application/json" }
     });
 
@@ -125,29 +126,16 @@ async function promptEverything(transcript, goals, difficulty, examDate, apiKey)
             {"question": "Q1", "possible_answers": ["A","B","C","D"], "index": 0, "related_topic": "Topic A"}
           ],
           "study_schedule": [
-             {"day_offset": 1, "title": "Study: Topic A", "details": "Deep dive...", "duration_minutes": 45, "type": "learning", "difficulty": "Hard", "completed": false}
+            {"day_offset": 1, "title": "Study: Topic A", "details": "Deep dive...", "duration_minutes": 45, "type": "learning", "difficulty": "Hard", "completed": false}
           ]
         }
         
         Transcript:
         ${transcript.substring(0, 50000)} 
     `;
-    // Truncate transcript to avoid limits if necessary, though 2.0 Flash has large context.
 
-    let result;
     try {
-        try {
-            result = await model.generateContent(prompt);
-        } catch (err) {
-            if (err.message.includes("404") || err.message.includes("not found")) {
-                console.warn("gemini-1.5-flash not found, falling back to gemini-pro");
-                const fallbackModel = genAI.getGenerativeModel({ model: "gemini-pro" });
-                result = await fallbackModel.generateContent(prompt);
-            } else {
-                throw err;
-            }
-        }
-
+        const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
 
