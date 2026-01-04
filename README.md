@@ -43,6 +43,21 @@ Scholar-AI/
 └── README.md
 ```
 
+## ☁️ Vercel Deployment
+
+Scholar AI is optimized for Vercel. To ensure it runs without issues:
+
+1. **Environment Variables**:
+   - Go to your Vercel Project **Settings** → **Environment Variables**.
+   - Add a new variable: `GEMINI_API_KEY`.
+   - **Value**: Use a **fresh** API key from [Google AI Studio](https://aistudio.google.com/app/apikey). 
+   - *Note: The old key `AIzaSyCM...` was revoked by Google due to a public leak and will not work.*
+
+2. **Automatic Config**:
+   - The root `vercel.json` automatically configures the Angular frontend and Python backend routes.
+
+---
+
 ## 🛠️ Easy Setup (Recommended)
 
 To set up the entire project (backend venv, dependencies, and environment) automatically on any machine, run:
