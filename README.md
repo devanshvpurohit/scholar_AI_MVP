@@ -56,6 +56,20 @@ Scholar AI is optimized for Vercel. To ensure it runs without issues:
 2. **Automatic Config**:
    - The root `vercel.json` automatically configures the Angular frontend and Python backend routes.
 
+## 🌐 Netlify Deployment (Frontend)
+
+To host the Angular frontend on Netlify:
+
+1. **Connect Repo**: Connect your GitHub repository to Netlify.
+2. **Auto-Detection**: Netlify will detect the `netlify.toml` file automatically.
+3. **Settings**:
+   - **Build Command**: `cd frontend-angular && npm install && npm run build`
+   - **Publish Directory**: `frontend-angular/dist/frontend-angular/browser`
+4. **Environment Variables**:
+   - Add your `FIREBASE_CONFIG` if needed, though most frontend keys are public-safe in Angular environments.
+
+*Note: Since the backend is Python (Flask), it's recommended to host the backend separately on Vercel or Render and update the `apiUrl` in your frontend environment files.*
+
 ---
 
 ## 🛠️ Easy Setup (Recommended)
