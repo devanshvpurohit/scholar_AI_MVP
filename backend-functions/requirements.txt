@@ -10,4 +10,3 @@ pypdf==3.17.4
 mutagen==1.47.0
 gunicorn==21.2.0
 werkzeug
-python-dotenv

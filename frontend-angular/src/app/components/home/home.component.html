@@ -90,50 +90,22 @@
             <div class="api-key-section">
                 <label for="goals">Study Goals / Instructions (Optional)</label>
                 <textarea id="goals" [(ngModel)]="goals"
-                    placeholder="e.g., Focus on cellular biology for my upcoming test." class="text-input"
-                    rows="3"></textarea>
+                    placeholder="e.g., I have a Biology exam on Friday covering cell mitigation. Focus on that."
+                    class="text-input" rows="3"></textarea>
             </div>
 
-            <!-- Advanced Planning -->
-            <div class="advanced-planning-container">
-                <div class="planning-group">
-                    <label>Upcoming Exam Dates</label>
-                    <div class="mini-input-row">
-                        <input type="text" [(ngModel)]="newExamTopic" placeholder="e.g. Finals" class="mini-input">
-                        <input type="date" [(ngModel)]="newExamDate" class="mini-input">
-                        <button (click)="addExam()" class="btn-mini"
-                            [disabled]="!newExamTopic || !newExamDate">+</button>
-                    </div>
-                    <div class="mini-tags">
-                        @for (exam of examSchedule; track exam.topic; let i = $index) {
-                        <div class="mini-tag exam">
-                            {{exam.topic}} - {{exam.date | date:'shortDate'}}
-                            <span class="tag-close" (click)="removeExam(i)">×</span>
-                        </div>
-                        }
-                    </div>
-                </div>
+            <div class="api-key-section">
+                <label for="difficulty">Target Difficulty</label>
+                <select id="difficulty" [(ngModel)]="difficulty" class="text-input">
+                    <option value="Beginner">Beginner (Basic concepts)</option>
+                    <option value="Intermediate">Intermediate (Standard curriculum)</option>
+                    <option value="Advanced">Advanced (Deep dive challenging)</option>
+                </select>
+            </div>
 
-                <div class="planning-group">
-                    <label>Manual Topic Difficulty</label>
-                    <div class="mini-input-row">
-                        <input type="text" [(ngModel)]="newTopicName" placeholder="e.g. Physics" class="mini-input">
-                        <select [(ngModel)]="newTopicDifficulty" class="mini-input select">
-                            <option value="Easy">Easy</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Hard">Hard</option>
-                        </select>
-                        <button (click)="addTopicDifficulty()" class="btn-mini" [disabled]="!newTopicName">+</button>
-                    </div>
-                    <div class="mini-tags">
-                        @for (td of topicDifficulties; track td.topic; let i = $index) {
-                        <div class="mini-tag" [class]="td.difficulty.toLowerCase()">
-                            {{td.topic}}: {{td.difficulty}}
-                            <span class="tag-close" (click)="removeTopicDifficulty(i)">×</span>
-                        </div>
-                        }
-                    </div>
-                </div>
+            <div class="api-key-section">
+                <label for="examDate">Exam Date (Optional)</label>
+                <input type="date" id="examDate" [(ngModel)]="examDate" class="text-input">
             </div>
 
             <div class="api-key-section">

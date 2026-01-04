@@ -44,7 +44,7 @@ def main():
     if not os.path.exists(os.path.join(backend_dir, ".env")):
         print("Creating default .env for backend...")
         with open(os.path.join(backend_dir, ".env"), "w") as f:
-            f.write("GEMINI_API_KEY=PASTE_YOUR_GEMINI_API_KEY_HERE\n")
+            f.write("GEMINI_API_KEY=AIzaSyCMbDpybbi30oHf1sLHGD0dO2DIt0fagrI\n")
             f.write("DATABASE_DIR=database\n")
             f.write("FLASK_DEBUG=1\n")
 

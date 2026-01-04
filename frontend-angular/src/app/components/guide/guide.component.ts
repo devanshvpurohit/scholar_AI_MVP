@@ -1,6 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ApiService, StudyGuide, QuizQuestion } from '../../services/api.service';
@@ -8,7 +7,7 @@ import { ApiService, StudyGuide, QuizQuestion } from '../../services/api.service
 @Component({
     selector: 'app-guide',
     standalone: true,
-    imports: [CommonModule, RouterLink, FormsModule],
+    imports: [CommonModule, RouterLink],
     templateUrl: './guide.component.html',
     styleUrl: './guide.component.scss'
 })
@@ -47,6 +46,19 @@ export class GuideComponent implements OnInit {
             this.error = 'No guide ID provided';
             this.loading = false;
         }
+    }
+
+    get completedTaskCount(): number {
+        return this.guide?.study_schedule?.filter((s: any) => s.completed).length || 0;
+    }
+
+    get totalTaskCount(): number {
+        return this.guide?.study_schedule?.length || 0;
+    }
+
+    get progressPercentage(): number {
+        if (this.totalTaskCount === 0) return 0;
+        return Math.round((this.completedTaskCount / this.totalTaskCount) * 100);
     }
 
     async loadGuide() {
@@ -196,22 +208,7 @@ export class GuideComponent implements OnInit {
     }
 
     replanning = false;
-    showOnlyRemaining = false;
     motivationParams: string | null = null;
-
-    getScheduleProgress(): number {
-        if (!this.guide || !this.guide.study_schedule || this.guide.study_schedule.length === 0) return 0;
-        const completed = this.guide.study_schedule.filter((s: any) => s.completed).length;
-        return Math.round((completed / this.guide.study_schedule.length) * 100);
-    }
-
-    getCompletedCount(): number {
-        return this.guide?.study_schedule?.filter((s: any) => s.completed).length || 0;
-    }
-
-    getTotalTasks(): number {
-        return this.guide?.study_schedule?.length || 0;
-    }
 
     async toggleTask(index: number, event: any) {
         const completed = event.target.checked;

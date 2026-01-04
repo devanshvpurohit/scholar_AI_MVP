@@ -9,5 +9,5 @@ export const environment = {
     appId: "1:978355602312:web:25ef0c5ab1119f5018b03d",
     measurementId: "G-FT4JKRFFWG"
   },
-  apiUrl: 'http://localhost:8080/api'
+  apiUrl: 'http://localhost:8069/api'
 };

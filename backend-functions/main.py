@@ -1,8 +1,3 @@
-import os
-
-# macOS gRPC deadlock fix (CRITICAL for local development on Apple Silicon)
-os.environ['OBJC_DISABLE_INITIALIZE_FORK_SAFETY'] = 'YES'
-os.environ['GRPC_ENABLE_FORK_SUPPORT'] = '0'
 
 """
 Scholar AI Backend
@@ -18,12 +13,6 @@ import tempfile
 import time
 from werkzeug.utils import secure_filename
 import google.generativeai as genai
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
-
-from functools import lru_cache
 from google.oauth2 import service_account
 from google.cloud import speech, storage
 import firebase_admin
@@ -33,7 +22,6 @@ from docx.shared import RGBColor, Pt
 from docx.oxml.ns import nsdecls
 from docx.oxml import parse_xml
 import pypdf
-from datetime import datetime
 from mutagen.mp3 import MP3
 from mutagen.wave import WAVE
 from mutagen.mp4 import MP4
@@ -52,52 +40,52 @@ logger = logging.getLogger(__name__)
 
 # Initialize Firebase Admin SDK
 logger.info("Starting Firebase Init...")
-cred_path = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', 'service-account-key.json')
-if not firebase_admin._apps:
-    if os.path.exists(cred_path):
-        cred = credentials.Certificate(cred_path)
-        firebase_admin.initialize_app(cred)
-        logger.info("Initialized Firebase with service account")
-    else:
-        logger.warning("GOOGLE_APPLICATION_CREDENTIALS not set and service-account-key.json not found. Firebase Admin SDK not initialized.")
+try:
+    cred_path = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', 'service-account-key.json')
+    if not firebase_admin._apps:
+        if os.path.exists(cred_path):
+            cred = credentials.Certificate(cred_path)
+            firebase_admin.initialize_app(cred)
+            logger.info("Initialized Firebase with service account")
+        else:
+            # Check if running in a cloud environment where default creds work
+            try:
+                # Explicitly set project ID for local development with user credentials
+                # firebase_admin.initialize_app(options={'projectId': 'medkey-vault'})
+                # logger.info("Initialized Firebase Admin with project: medkey-vault")
+                logger.warning("Skipping Firebase ADC Init to prevent crash - Use Demo User")
+            except Exception as e:
+                logger.warning(f"Firebase Admin init failed: {e}")
+except Exception as e:
+    logger.error(f"Critical Firebase Init Error: {e}")
 logger.info("Firebase Init Step Complete")
 
-# Robust API Key Rotation System
-GEMINI_KEYS = [
-    "AIzaSyDSj5KqM04bEFLMeb_0p7QGJ0hSGKKP1vY"
-]
-
-class APIKeyManager:
-    def __init__(self, keys):
-        # Allow environment override, else use provided keys
-        env_keys = os.environ.get("GEMINI_API_KEYS")
-        self.keys = env_keys.split(",") if env_keys else keys
-        self.current_index = 0
-        logger.info(f"API Key Manager initialized with {len(self.keys)} keys.")
-
-    def get_current_key(self):
-        return self.keys[self.current_index]
-
-    def rotate(self):
-        self.current_index = (self.current_index + 1) % len(self.keys)
-        logger.warning(f"Switched to API Key index {self.current_index} due to issue.")
-        return self.get_current_key()
-
-key_manager = APIKeyManager(GEMINI_KEYS)
+# Configure Gemini API
+USER_GEMINI_API_KEY = "AIzaSyBHeHded7qQ26R4y-6OglmK22O_U3NeR-0"
+DEFAULT_GEMINI_KEY = os.environ.get("GEMINI_API_KEY", USER_GEMINI_API_KEY)
 
 def get_gemini_key(request=None):
-    """Get Gemini API key with rotation fallback"""
+    """Get Gemini API key from request header or fallback"""
     if request:
         header_key = request.headers.get('X-Gemini-API-Key')
         if header_key and header_key.strip():
             return header_key
-    return key_manager.get_current_key()
+            
+        form_key = request.form.get('api_key')
+        if form_key and form_key.strip():
+            return form_key
+    
+    if DEFAULT_GEMINI_KEY and DEFAULT_GEMINI_KEY != "PASTE_YOUR_GEMINI_API_KEY_HERE":
+        return DEFAULT_GEMINI_KEY
+    return None
 
 def configure_genai(request=None):
-    """Configure GenAI with current key"""
+    """Configure GenAI with specific key"""
     api_key = get_gemini_key(request)
-    genai.configure(api_key=api_key)
-    return True
+    if api_key:
+        genai.configure(api_key=api_key)
+        return True
+    return False
 
 # Google Cloud Storage bucket
 GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME", "scholar-ai-storage")
@@ -225,55 +213,56 @@ def get_audio_transcript(file_path):
 # GEMINI PROMPTS (Updated to gemini-1.5-flash)
 # ============================================================================
 
-def prompt_everything(prompt, goals="", exam_schedule=None, manual_difficulties=None):
-    """
-    Generate study material using rotation if quota exceeded or error occurs.
-    Includes custom user goals, exam schedules, and manual topic difficulties.
-    """
-    max_retries = len(key_manager.keys)
-    attempts = 0
+def prompt_everything(prompt, goals="", difficulty="Intermediate", exam_date=""):
+    """Generate EVERYTHING in a single Gemini call to save time (crucial for Vercel timeout)"""
+    model = genai.GenerativeModel("gemini-2.5-flash-lite")
     
-    while attempts < max_retries:
-        try:
-            configure_genai()
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            logger.info(f"Attempting generation with key index {key_manager.current_index}. Transcript length: {len(prompt)}")
-            
-            exam_context = f"The user has upcoming exams: {json.dumps(exam_schedule)}. " if exam_schedule else ""
-            difficulty_context = f"Manual topic difficulties (Honor these): {json.dumps(manual_difficulties)}. " if manual_difficulties else ""
-            
-            final_prompt = (
-                f"You are an expert study planner. User Goal: '{goals}'. "
-                f"{exam_context}{difficulty_context}"
-                "Analyze the content and generate a comprehensive study system. "
-                "1. **Tag Topics**: Identify topics. Use manual difficulty if provided, otherwise estimate. "
-                "2. **Exam Focus**: Align the schedule to lead up to exam dates if provided. "
-                "3. **Spaced Repetition**: Insert 'Revision' slots for hard topics. "
-                "4. **Feasibility**: 30-60 mins max per session. "
-                "Return SINGLE VALID JSON structure:\n"
-                "{\n"
-                "  \"title\": \"...\",\n"
-                "  \"summary\": \"...\",\n"
-                "  \"topics\": [{\"name\": \"Topic A\", \"difficulty\": \"Hard\"}],\n"
-                "  \"study_tips\": [\"...\"],\n"
-                "  \"flash_cards\": [[\"Q\", \"A\"]],\n"
-                "  \"quiz\": [{\"question\": \"...\", \"possible_answers\": [], \"index\": 0, \"related_topic\": \"...\"}],\n"
-                "  \"study_schedule\": [{\"day_offset\": 1, \"title\": \"...\", \"details\": \"...\", \"duration_minutes\": 45, \"type\": \"learning\", \"difficulty\": \"Hard\"}]\n"
-                "}\n\n"
-                "Content:\n" + prompt
-            )
-            
-            response = model.generate_content(final_prompt, generation_config={"response_mime_type": "application/json"})
-            logger.info("Successfully generated content from Gemini")
-            return json.loads(response.text)
-            
-        except Exception as e:
-            attempts += 1
-            logger.error(f"Generation attempt {attempts} failed with key index {key_manager.current_index}: {e}")
-            if attempts < max_retries:
-                key_manager.rotate()
-            else:
-                raise e
+    final_prompt = (
+        f"You are an expert, autonomous study planner. The user's specific goal is: '{goals}'. "
+        f"The Target Difficulty Level is: '{difficulty}'. "
+        f"The Exam Date is: '{exam_date}' (If provided, strictly plan backwards from this date). "
+        "Analyze the transcript and generate a comprehensive study system adapted to this difficulty. "
+        "1. **Autonomous Study Plan**: Generate a self-sufficient day-by-day schedule leading up to the exam. "
+        "2. **Tag Topics by Difficulty**: Identify key topics and rate them (Easy/Medium/Hard). "
+        "3. **Spaced Repetition**: Insert specific 'Revision' slots for hard topics to ensure retention. "
+        "4. **Feasibility**: Ensure daily study time is realistic (30-60 mins max per session). "
+        "5. **Personalization**: Provide specific study tips for this material. "
+        "Return a SINGLE VALID JSON object with this EXACT structure:\n"
+        "{\n"
+        "  \"title\": \"Catchy Title\",\n"
+        "  \"summary\": \"Detailed summary...\",\n"
+        "  \"topics\": [\n"
+        "     {\"name\": \"Topic A\", \"difficulty\": \"Hard\"},\n"
+        "     {\"name\": \"Topic B\", \"difficulty\": \"Medium\"}\n"
+        "  ],\n"
+        "  \"study_tips\": [\"Tip 1\", \"Tip 2 using mnemonic...\"],\n"
+        "  \"flash_cards\": [[\"Q1\", \"A1\"], ...], (10 cards)\n"
+        "  \"quiz\": [\n"
+        "    {\"question\": \"Q1\", \"possible_answers\": [\"A\",\"B\",\"C\",\"D\"], \"index\": 0, \"related_topic\": \"Topic A\"},\n"
+        "    ... (10 questions)\n"
+        "  ],\n"
+        "  \"study_schedule\": [\n"
+        "     {\"day_offset\": 1, \"title\": \"Study: Topic A\", \"details\": \"Deep dive...\", \"duration_minutes\": 45, \"type\": \"learning\", \"difficulty\": \"Hard\"},\n"
+        "     {\"day_offset\": 2, \"title\": \"Revision: Topic A\", \"details\": \"Quick review to reinforce memory.\", \"duration_minutes\": 15, \"type\": \"revision\", \"difficulty\": \"Hard\"},\n"
+        "     {\"day_offset\": 3, \"title\": \"Quiz & Assessment\", \"details\": \"Final check.\", \"duration_minutes\": 20, \"type\": \"quiz\", \"difficulty\": \"Medium\"}\n"
+        "  ]\n"
+        "}\n\n"
+        "Transcript:\n" + prompt
+    )
+    
+    try:
+        response = model.generate_content(final_prompt, generation_config={"response_mime_type": "application/json"})
+        return json.loads(response.text)
+    except Exception as e:
+        logger.error(f"Gemini Generation Error: {e}")
+        # Fallback to empty structure if parsing fails
+        return {
+            "title": "Error Generating Guide",
+            "summary": "The AI could not process this text within the time limit or format constraints.",
+            "flash_cards": [],
+            "quiz": [],
+            "study_schedule": []
+        }
 
 # Deprecated individual prompt functions removed for performance
 # def prompt_flashcards...
@@ -373,45 +362,28 @@ def handle_upload():
         if not transcript.strip():
             return jsonify({"error": "Could not extract text from file"}), 400
 
-        # Extract Metadata
-        goals = request.form.get('goals', 'General mastery')
-        exam_schedule = request.form.get('exam_schedule') # JSON string
-        topic_difficulties = request.form.get('topic_difficulties') # JSON string
+        # 2. Generate Content
+        goals = request.form.get('goals', '')
+        difficulty = request.form.get('difficulty', 'Intermediate')
+        exam_date = request.form.get('exam_date', '')
+        study_guide = prompt_everything(transcript, goals, difficulty, exam_date)
         
-        if exam_schedule:
-            try: exam_schedule = json.loads(exam_schedule)
-            except: exam_schedule = None
-            
-        if topic_difficulties:
-            try: topic_difficulties = json.loads(topic_difficulties)
-            except: topic_difficulties = None
-
-        # Generate Study Guide with Rotation Support
-        try:
-            guide_data = prompt_everything(
-                transcript, 
-                goals=goals, 
-                exam_schedule=exam_schedule, 
-                manual_difficulties=topic_difficulties
-            )
-        except Exception as ai_err:
-            return jsonify({"error": f"AI Generation failed after exhausting all keys: {str(ai_err)}"}), 500
+        if study_guide.get('title') == "Error Generating Guide":
+            return jsonify({"error": f"AI Generation Failed. Please check your API Key. (Summary: {study_guide.get('summary')})"}), 500
         
         # 3. Store Result
-        guide_id = str(int(time.time()))
-        guide_data['id'] = guide_id
-        guide_data['created_at'] = datetime.now().isoformat()
-        guide_data['filename'] = filename
-        guide_data['user_id'] = user_id
-        guide_data['goals'] = goals
-        guide_data['exam_schedule'] = exam_schedule
-        guide_data['manual_difficulties'] = topic_difficulties
+        guide_id = str(int(time.time())) # Simple ID gen
+        study_guide['id'] = guide_id
+        study_guide['created_at'] = int(time.time())
+        study_guide['filename'] = filename
+        study_guide['user_id'] = user_id
+        study_guide['goals'] = goals
         
         # Save to local JSON "DB"
         with open(os.path.join(DB_PATH, f'{guide_id}.json'), 'w') as f:
-            json.dump(guide_data, f)
+            json.dump(study_guide, f)
             
-        return jsonify(guide_data), 200
+        return jsonify(study_guide), 200
 
     except Exception as e:
         logger.error(f"Error processing file: {e}")
@@ -447,7 +419,6 @@ def get_all_guides():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/guide/<guide_id>', methods=['GET'])
-@lru_cache(maxsize=32)
 def get_guide(guide_id):
     try:
         file_path = os.path.join(DB_PATH, f'{guide_id}.json')
@@ -600,7 +571,7 @@ def replan_schedule(guide_id):
         with open(file_path, 'r') as f:
             guide_data = json.load(f)
             
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash-lite")
         remaining_tasks = [s for s in guide_data.get('study_schedule', []) if not s.get('completed')]
         
         prompt = (
@@ -636,7 +607,7 @@ def get_motivation():
         completed_count = data.get('completed_count', 0)
         total_count = data.get('total_count', 0)
         
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash-lite")
         prompt = (
             f"User has completed {completed_count} out of {total_count} study sessions. "
             "Give them a short, punchy, 1-sentence motivational quote or nudge to keep going. "
@@ -648,4 +619,5 @@ def get_motivation():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    port = int(os.environ.get('PORT', 8069))
+    app.run(debug=True, host='0.0.0.0', port=port)

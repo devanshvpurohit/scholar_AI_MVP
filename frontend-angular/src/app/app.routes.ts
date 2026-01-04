@@ -1,7 +1,4 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './components/home/home.component';
-import { LoginComponent } from './components/auth/login.component';
-import { GuideComponent } from './components/guide/guide.component';
 
 export const routes: Routes = [
     {
@@ -11,17 +8,17 @@ export const routes: Routes = [
     },
     {
         path: 'home',
-        component: HomeComponent,
+        loadComponent: () => import('./components/home/home.component').then(m => m.HomeComponent),
         title: 'Scholar AI - Home'
     },
     {
         path: 'login',
-        component: LoginComponent,
+        loadComponent: () => import('./components/auth/login.component').then(m => m.LoginComponent),
         title: 'Scholar AI - Login'
     },
     {
         path: 'guide/:id',
-        component: GuideComponent,
+        loadComponent: () => import('./components/guide/guide.component').then(m => m.GuideComponent),
         title: 'Scholar AI - Study Guide'
     },
     {

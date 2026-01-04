@@ -71,31 +71,15 @@ export class ApiService {
         return this.http.get(`${this.apiUrl}/health`);
     }
 
-    uploadFile(
-        file: File,
-        apiKey?: string,
-        goals?: string,
-        examSchedule?: any[],
-        topicDifficulties?: any
-    ): Observable<UploadResponse> {
+    uploadFile(file: File, apiKey: string, goals: string, difficulty: string, examDate: string): Observable<UploadResponse> {
         return this.getAuthHeaders().pipe(
-            switchMap(authHeaders => {
+            switchMap(headers => {
                 const formData = new FormData();
                 formData.append('file', file);
-                if (goals) {
-                    formData.append('goals', goals);
-                }
-                if (examSchedule) {
-                    formData.append('exam_schedule', JSON.stringify(examSchedule));
-                }
-                if (topicDifficulties) {
-                    formData.append('topic_difficulties', JSON.stringify(topicDifficulties));
-                }
-
-                let headers = authHeaders;
-                if (apiKey) {
-                    headers = headers.set('X-Gemini-API-Key', apiKey);
-                }
+                formData.append('api_key', apiKey);
+                formData.append('goals', goals);
+                formData.append('difficulty', difficulty);
+                formData.append('exam_date', examDate);
 
                 return this.http.post<UploadResponse>(`${this.apiUrl}/upload`, formData, { headers });
             })

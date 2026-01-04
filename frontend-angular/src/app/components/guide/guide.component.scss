@@ -776,6 +776,36 @@
 }
 
 // Advanced Study Features
+.schedule-progress-bar-container {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+
+    .progress-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: #d1d5db;
+        font-weight: 500;
+    }
+
+    .progress-track {
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #a855f7, #6366f1);
+        transition: width 0.5s ease;
+        border-radius: 4px;
+    }
+}
+
 .study-tips-box {
     background: rgba(168, 85, 247, 0.1);
     border: 1px solid rgba(168, 85, 247, 0.2);
@@ -826,111 +856,6 @@
         background: rgba(34, 197, 94, 0.25);
         color: #86efac;
         border: 1px solid rgba(34, 197, 94, 0.3);
-    }
-}
-
-// Progress Stats Card
-.progress-stats-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-
-    .stats-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 1rem;
-
-        .stats-label {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9rem;
-        }
-
-        .stats-value {
-            color: #fff;
-            font-weight: 600;
-        }
-    }
-
-    .progress-bar-container {
-        height: 10px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 5px;
-        overflow: hidden;
-        margin-bottom: 1rem;
-
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #a855f7, #ec4899);
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-    }
-
-    .stats-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        .progress-percent {
-            color: #a855f7;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        .filter-toggle {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.85rem;
-            cursor: pointer;
-
-            input {
-                cursor: pointer;
-            }
-        }
-    }
-}
-
-// Plan Explanation Box
-.plan-explanation-box {
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 12px;
-    padding: 1.25rem;
-    margin-bottom: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-
-    .agent-avatar {
-        font-weight: bold;
-        color: #60a5fa;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-    }
-
-    .explanation-text {
-        color: rgba(255, 255, 255, 0.9);
-        font-style: italic;
-        line-height: 1.5;
-    }
-}
-
-.task-checkbox {
-    width: 20px;
-    height: 20px;
-    accent-color: #a855f7;
-    cursor: pointer;
-}
-
-.timeline-item.completed-item {
-    opacity: 0.7;
-
-    .timeline-marker {
-        background: #22c55e !important;
-        border-color: #22c55e !important;
     }
 }
 
