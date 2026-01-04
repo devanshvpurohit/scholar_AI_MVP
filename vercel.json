@@ -19,12 +19,11 @@
             "dest": "backend-node/index.js"
         },
         {
-            "src": "/assets/(.*)",
-            "dest": "frontend-angular/dist/frontend-angular/browser/assets/$1"
+            "handle": "filesystem"
         },
         {
             "src": "/(.*)",
-            "dest": "frontend-angular/dist/frontend-angular/browser/index.html"
+            "dest": "/index.html"
         }
     ]
 }
