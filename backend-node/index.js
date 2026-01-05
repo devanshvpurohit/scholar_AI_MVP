@@ -31,7 +31,7 @@ if (!fsRegular.existsSync(DATABASE_DIR)) {
 }
 
 // Gemini Configuration
-const HARDCODED_GEMINI_KEY = "AIzaSyBHeHded7qQ26R4y-6OglmK22O_U3NeR-0";
+const HARDCODED_GEMINI_KEY = "AIzaSyBfkkWW-MFn198BfklgT7SSytlnhwx_DZg";
 const DEFAULT_GEMINI_KEY = process.env.GEMINI_API_KEY || HARDCODED_GEMINI_KEY;
 
 function getGeminiKey(req) {
