@@ -72,21 +72,52 @@ export default async function handler(req, res) {
       `;
         } else if (action === 'replan') {
             const { guideData, missedReason } = req.body;
+            // Provide context for what the material is about
+            const materialContext = {
+                title: guideData.title,
+                summary: guideData.summary ? guideData.summary.substring(0, 5000) : "No summary available"
+            };
+
             // Only pass necessary schedule data to avoid prompt size issues
             const currentSchedule = (guideData.study_schedule || []).map(t => ({
                 day_offset: t.day_offset,
                 title: t.title,
                 duration_minutes: t.duration_minutes,
-                completed: !!t.completed
+                completed: !!t.completed,
+                difficulty: t.difficulty || 'Medium',
+                type: t.type || 'learning'
             }));
 
             prompt = `
         You are an expert study planner. 
-        The current schedule is: ${JSON.stringify(currentSchedule)}.
-        Reason for needing a change: '${missedReason || 'User missed some sessions'}'.
+        Material Context:
+        Title: ${materialContext.title}
+        Key Summary: ${materialContext.summary}
+
+        Current Schedule Status: ${JSON.stringify(currentSchedule)}
         
-        Generate a NEW study schedule covering the remaining material.
-        Return JSON: {"study_schedule": [{"day_offset": 1, "title": "...", "details": "...", "duration_minutes": 30, "difficulty": "Hard", "completed": false}], "plan_explanation": "Short explain why..." }
+        The student needs to REPLAN their schedule because: '${missedReason || 'They missed some study sessions and need to catch up.'}'.
+        
+        Generate a NEW, optimized study schedule that:
+        1. Helps them catch up on any missed topics.
+        2. Maintains a realistic workload (30-60 mins/day).
+        3. Covers the remaining material effectively given the context provided.
+        
+        You MUST return valid JSON exactly in this format:
+        {
+          "study_schedule": [
+             {
+               "day_offset": 1, 
+               "title": "Study: Topic Name", 
+               "details": "Explanation of what to study...", 
+               "duration_minutes": 30, 
+               "difficulty": "Hard/Medium/Easy", 
+               "type": "learning/revision", 
+               "completed": false
+             }
+          ],
+          "plan_explanation": "A short, encouraging explanation of how this new plan helps them stay on track."
+        }
       `;
         } else {
             return res.status(400).json({ error: 'Invalid action' });

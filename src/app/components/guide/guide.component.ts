@@ -285,7 +285,8 @@ export class GuideComponent implements OnInit {
                 }
             }
         } catch (e: any) {
-            alert('Replanning failed: ' + (e.error?.error || e.message));
+            const errorMsg = e.error?.details || e.error?.error || e.message || 'Unknown error';
+            alert('Replanning failed: ' + errorMsg);
         } finally {
             this.replanning = false;
         }
