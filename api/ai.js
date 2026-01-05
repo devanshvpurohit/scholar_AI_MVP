@@ -72,51 +72,52 @@ export default async function handler(req, res) {
       `;
         } else if (action === 'replan') {
             const { guideData, missedReason } = req.body;
-            // Provide context for what the material is about
-            const materialContext = {
-                title: guideData.title,
-                summary: guideData.summary ? guideData.summary.substring(0, 5000) : "No summary available"
-            };
 
-            // Only pass necessary schedule data to avoid prompt size issues
+            // Context from the guide
+            const materialContext = `Title: ${guideData.title}\nSummary: ${guideData.summary ? guideData.summary.substring(0, 3000) : 'N/A'}`;
+
+            // Only pass necessary schedule data
             const currentSchedule = (guideData.study_schedule || []).map(t => ({
                 day_offset: t.day_offset,
                 title: t.title,
+                details: t.details,
                 duration_minutes: t.duration_minutes,
-                completed: !!t.completed,
                 difficulty: t.difficulty || 'Medium',
-                type: t.type || 'learning'
+                completed: !!t.completed
             }));
 
             prompt = `
-        You are an expert study planner. 
-        Material Context:
-        Title: ${materialContext.title}
-        Key Summary: ${materialContext.summary}
+        Recreate the remaining study schedule based on the current one and the study material context.
 
-        Current Schedule Status: ${JSON.stringify(currentSchedule)}
-        
-        The student needs to REPLAN their schedule because: '${missedReason || 'They missed some study sessions and need to catch up.'}'.
-        
-        Generate a NEW, optimized study schedule that:
-        1. Helps them catch up on any missed topics.
-        2. Maintains a realistic workload (30-60 mins/day).
-        3. Covers the remaining material effectively given the context provided.
-        
-        You MUST return valid JSON exactly in this format:
+        Material Context:
+        ${materialContext}
+
+        Rules:
+        - Keep completed sessions unchanged.
+        - Only regenerate sessions where completed = false.
+        - Continue day numbers after the last completed day.
+        - Each session must include: day_offset, title, details, duration_minutes, difficulty, completed.
+        - Return ONLY valid JSON. No text, no markdown.
+
+        Input schedule:
+        ${JSON.stringify(currentSchedule)}
+
+        Reason for replanning:
+        ${missedReason || 'User needs an optimized schedule.'}
+
+        Output format:
         {
           "study_schedule": [
-             {
-               "day_offset": 1, 
-               "title": "Study: Topic Name", 
-               "details": "Explanation of what to study...", 
-               "duration_minutes": 30, 
-               "difficulty": "Hard/Medium/Easy", 
-               "type": "learning/revision", 
-               "completed": false
-             }
+            {
+              "day_offset": 1,
+              "title": "",
+              "details": "",
+              "duration_minutes": 30,
+              "difficulty": "Medium",
+              "completed": false
+            }
           ],
-          "plan_explanation": "A short, encouraging explanation of how this new plan helps them stay on track."
+          "plan_explanation": "Short summary of the changes made."
         }
       `;
         } else {
