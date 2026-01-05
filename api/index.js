@@ -53,7 +53,7 @@ if (!fsRegular.existsSync(UPLOAD_DIR)) {
 const upload = multer({ dest: UPLOAD_DIR });
 
 // Gemini Configuration
-const HARDCODED_GEMINI_KEY = "AIzaSyApLxKHefoVZKTzUy8qOttT4rSO81xtxa0";
+const HARDCODED_GEMINI_KEY = "AIzaSyBfkkWW-MFn198BfklgT7SSytlnhwx_DZg";
 const DEFAULT_GEMINI_KEY = process.env.GEMINI_API_KEY || HARDCODED_GEMINI_KEY;
 
 function getGeminiKey(req) {
