@@ -15,7 +15,7 @@ export interface StudyGuide {
     userId?: string;
     title: string;
     summary: string;
-    flash_cards: string[][];
+    flash_cards: { front: string, back: string }[];
     quiz: any[];
     study_tips?: string[];
     topics?: { name: string; difficulty: string }[];

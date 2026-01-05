@@ -50,6 +50,16 @@ export class ApiService {
                     throw new Error("AI response was not valid JSON. Please try again.");
                 }
 
+                // Transform flashcards from nested array to object array for Firestore
+                if (guideData.flash_cards && Array.isArray(guideData.flash_cards)) {
+                    guideData.flash_cards = guideData.flash_cards.map((card: any) => {
+                        if (Array.isArray(card)) {
+                            return { front: card[0] || '', back: card[1] || '' };
+                        }
+                        return card;
+                    });
+                }
+
                 const guideId = Date.now().toString();
                 const newGuide: StudyGuide = {
                     ...guideData,

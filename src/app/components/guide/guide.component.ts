@@ -204,8 +204,8 @@ export class GuideComponent implements OnInit {
     exportFlashcards() {
         if (!this.guide) return;
         let content = `Flashcards: ${this.guide.title}\n\n`;
-        this.guide.flash_cards.forEach((card, i) => {
-            content += `Q: ${card[0]}\nA: ${card[1]}\n\n`;
+        this.guide.flash_cards.forEach((card: any, i) => {
+            content += `Q: ${card.front}\nA: ${card.back}\n\n`;
         });
         this.downloadFile(`${this.guide.title}_flashcards.txt`, content);
     }
