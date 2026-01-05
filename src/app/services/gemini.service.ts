@@ -88,7 +88,7 @@ export class GeminiService {
         return this.generateWithRetry(model, prompt);
     }
 
-    private async generateWithRetry(model: any, prompt: string, maxRetries = 3): Promise<any> {
+    private async generateWithRetry(model: any, prompt: string, maxRetries = 5): Promise<any> {
         let attempt = 0;
         while (attempt < maxRetries) {
             try {

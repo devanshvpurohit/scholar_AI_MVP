@@ -38,6 +38,7 @@ export class HomeComponent {
 
     availableModels = [
         { id: 'gemini-1.5-flash-001', name: 'Gemini 1.5 Flash (Recommended)' },
+        { id: 'gemini-1.5-flash-8b', name: 'Gemini 1.5 Flash-8B (Fastest)' },
         { id: 'gemini-1.5-pro-001', name: 'Gemini 1.5 Pro (Smarter, Slower)' },
         { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Experimental)' }
     ];
