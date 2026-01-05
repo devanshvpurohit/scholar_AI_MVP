@@ -1,47 +1,18 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, from, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
-import { AuthService } from './auth.service';
+import { Observable, from, of, throwError } from 'rxjs';
+import { switchMap, map } from 'rxjs/operators';
+import { FileService } from './file.service';
+import { GeminiService } from './gemini.service';
+import { DataService, GuideListItem, StudyGuide } from './data.service';
 
-export interface GuideListItem {
-    id: string;
-    title: string;
-    filename: string;
-    created_at: number;
-}
+// Re-export for components that import from here
+export { GuideListItem, StudyGuide };
 
 export interface QuizQuestion {
     question: string;
     possible_answers: string[];
     index: number;
 }
-
-export interface StudyGuide {
-    id: string;
-    title: string;
-    summary: string;
-    flash_cards: string[][];
-    quiz: QuizQuestion[];
-    study_tips?: string[];
-    topics?: { name: string; difficulty: string }[];
-    plan_explanation?: string;
-    study_schedule?: {
-        day_offset: number;
-        title: string;
-        details: string;
-        duration_minutes: number;
-        completed?: boolean;
-        type?: string;
-        difficulty?: string;
-    }[];
-    created_at: number;
-    filename?: string;
-}
-
-
-
 export interface UploadResponse {
     id: string;
     title: string;
@@ -51,89 +22,92 @@ export interface UploadResponse {
     providedIn: 'root'
 })
 export class ApiService {
-    private http = inject(HttpClient);
-    private authService = inject(AuthService);
-    private apiUrl = environment.apiUrl;
-
-    private getAuthHeaders(): Observable<HttpHeaders> {
-        return from(this.authService.getIdToken()).pipe(
-            switchMap(token => {
-                let headers = new HttpHeaders();
-                if (token) {
-                    headers = headers.set('Authorization', `Bearer ${token}`);
-                }
-                return of(headers);
-            })
-        );
-    }
+    private fileService = inject(FileService);
+    private geminiService = inject(GeminiService);
+    private dataService = inject(DataService);
 
     healthCheck(): Observable<any> {
-        return this.http.get(`${this.apiUrl}/health`);
+        return of({ status: 'ok', backend: 'angular-client-only' });
     }
 
-    uploadFile(file: File, apiKey: string, goals: string, difficulty: string, examDate: string): Observable<UploadResponse> {
-        return this.getAuthHeaders().pipe(
-            switchMap(headers => {
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('api_key', apiKey);
-                formData.append('goals', goals);
-                formData.append('difficulty', difficulty);
-                formData.append('exam_date', examDate);
+    uploadFile(file: File, apiKey: string, goals: string, difficulty: string, examDate: string, modelName: string): Observable<UploadResponse> {
+        // Save API key for future requests (motivation/replan)
+        localStorage.setItem('gemini_api_key', apiKey);
 
-                return this.http.post<UploadResponse>(`${this.apiUrl}/upload`, formData, { headers });
-            })
+        return from(this.fileService.extractText(file)).pipe(
+            switchMap(transcript => {
+                // If it's a PDF/Doc/Txt check if empty
+                if (!transcript && !file.type.startsWith('audio/') && !file.type.startsWith('video/')) {
+                    throw new Error("Could not extract text from file.");
+                }
+
+                return from(this.geminiService.generateStudyGuide(transcript, goals, difficulty, examDate, apiKey, modelName));
+            }),
+            switchMap(guideData => {
+                // Ensure data structure
+                if (typeof guideData === 'string') {
+                    // Fallback if AI returned raw string despite JSON instruction
+                    throw new Error("AI response was not valid JSON. Please try again.");
+                }
+
+                const guideId = Date.now().toString();
+                const newGuide: StudyGuide = {
+                    ...guideData,
+                    id: guideId,
+                    created_at: Date.now(),
+                    filename: file.name,
+                    goals: goals
+                };
+                return this.dataService.saveGuide(newGuide);
+            }),
+            map(savedGuide => ({ id: savedGuide.id, title: savedGuide.title }))
         );
     }
 
     getGuide(id: string): Observable<StudyGuide> {
-        return this.getAuthHeaders().pipe(
-            switchMap(headers => {
-                return this.http.get<StudyGuide>(`${this.apiUrl}/guide/${id}`, { headers });
-            })
-        );
+        return this.dataService.getGuide(id);
     }
 
     getAllGuides(): Observable<{ guides: GuideListItem[] }> {
-        return this.getAuthHeaders().pipe(
-            switchMap(headers => {
-                return this.http.get<{ guides: GuideListItem[] }>(`${this.apiUrl}/guides`, { headers });
-            })
-        );
+        return this.dataService.getAllGuides();
     }
 
     deleteGuide(id: string): Observable<{ success: boolean }> {
-        return this.getAuthHeaders().pipe(
-            switchMap(headers => {
-                return this.http.delete<{ success: boolean }>(`${this.apiUrl}/guide/${id}`, { headers });
-            })
-        );
+        return this.dataService.deleteGuide(id).pipe(map(success => ({ success })));
     }
 
     getExportUrl(type: 'quiz' | 'flashcards' | 'summary', guideId: string): string {
-        return `${this.apiUrl}/export/${type}/${guideId}`;
+        // Not used in client-side version directly as URL. 
+        // Components should be updated to handle export via Blob if needed.
+        return '';
     }
 
     updateProgress(guideId: string, index: number, completed: boolean): Observable<any> {
-        return this.getAuthHeaders().pipe(
-            switchMap(headers => {
-                return this.http.put(`${this.apiUrl}/guide/${guideId}/progress`, { index, completed }, { headers });
-            })
-        );
+        return this.dataService.updateProgress(guideId, index, completed);
     }
 
     getMotivation(completedCount: number, totalCount: number): Observable<{ message: string }> {
-        return this.getAuthHeaders().pipe(
-            switchMap(headers => {
-                return this.http.post<{ message: string }>(`${this.apiUrl}/motivation`, { completed_count: completedCount, total_count: totalCount }, { headers });
-            })
+        const apiKey = localStorage.getItem('gemini_api_key');
+        if (!apiKey) return of({ message: "Keep going! (Add API Key to get AI motivation)" });
+
+        return from(this.geminiService.getMotivation(completedCount, totalCount, apiKey)).pipe(
+            map(message => ({ message }))
         );
     }
 
     replanSchedule(guideId: string, missedReason: string = ''): Observable<any> {
-        return this.getAuthHeaders().pipe(
-            switchMap(headers => {
-                return this.http.post<any>(`${this.apiUrl}/guide/${guideId}/replan`, { missed_reason: missedReason }, { headers });
+        const apiKey = localStorage.getItem('gemini_api_key');
+        if (!apiKey) return throwError(() => new Error("API Key required for replanning"));
+
+        return this.getGuide(guideId).pipe(
+            switchMap(guide => {
+                return from(this.geminiService.replanSchedule(guide, missedReason, apiKey)).pipe(
+                    switchMap(newPlan => {
+                        return this.dataService.updateSchedule(guideId, newPlan.study_schedule, newPlan.plan_explanation).pipe(
+                            map(() => newPlan)
+                        );
+                    })
+                );
             })
         );
     }

@@ -103,16 +103,28 @@
                 </select>
             </div>
 
+
+
+            <div class="api-key-section">
+                <label for="modelSelect">AI Model</label>
+                <select id="modelSelect" [(ngModel)]="selectedModel" class="text-input">
+                    @for (model of availableModels; track model.id) {
+                    <option [value]="model.id">{{ model.name }}</option>
+                    }
+                </select>
+            </div>
+
             <div class="api-key-section">
                 <label for="examDate">Exam Date (Optional)</label>
                 <input type="date" id="examDate" [(ngModel)]="examDate" class="text-input">
             </div>
 
             <div class="api-key-section">
-                <label for="apiKey">Gemini API Key (Optional)</label>
+                <label for="apiKey">🔑 Gemini API Key <span class="required">*Required</span></label>
                 <input type="password" id="apiKey" [(ngModel)]="apiKey" placeholder="Paste your Gemini API Key here"
-                    class="api-key-input">
-                <p class="api-info">Leave blank if using backend configured key</p>
+                    class="api-key-input" required>
+                <p class="api-info">Get your free API key at <a href="https://aistudio.google.com/app/apikey"
+                        target="_blank">Google AI Studio</a></p>
             </div>
 
             <button class="btn-primary btn-upload" (click)="uploadFile()">

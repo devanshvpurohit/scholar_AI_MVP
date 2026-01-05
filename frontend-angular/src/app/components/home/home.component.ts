@@ -36,6 +36,13 @@ export class HomeComponent {
 
     readonly supportedFormats = ['MP4', 'MP3', 'PDF', 'DOCX', 'TXT', 'HTML', 'MD'];
 
+    availableModels = [
+        { id: 'gemini-1.5-flash-001', name: 'Gemini 1.5 Flash (Recommended)' },
+        { id: 'gemini-1.5-pro-001', name: 'Gemini 1.5 Pro (Smarter, Slower)' },
+        { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Experimental)' }
+    ];
+    selectedModel = 'gemini-1.5-flash-001';
+
     ngOnInit() {
         this.loadRecentGuides();
     }
@@ -103,6 +110,12 @@ export class HomeComponent {
     async uploadFile() {
         if (!this.selectedFile) return;
 
+        // Validate API key
+        if (!this.apiKey || this.apiKey.trim() === '') {
+            this.uploadError = 'Please provide your Gemini API key. Get one free at https://aistudio.google.com/app/apikey';
+            return;
+        }
+
         this.isUploading = true;
         this.uploadError = '';
         this.uploadProgress = 0;
@@ -115,7 +128,7 @@ export class HomeComponent {
         }, 500);
 
         try {
-            const response = await this.apiService.uploadFile(this.selectedFile, this.apiKey, this.goals, this.difficulty, this.examDate).toPromise();
+            const response = await this.apiService.uploadFile(this.selectedFile, this.apiKey, this.goals, this.difficulty, this.examDate, this.selectedModel).toPromise();
             clearInterval(progressInterval);
             this.uploadProgress = 100;
 

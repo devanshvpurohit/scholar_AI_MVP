@@ -170,17 +170,50 @@ export class GuideComponent implements OnInit {
         return this.quizAnswers[questionIndex] === this.guide.quiz[questionIndex].index;
     }
 
-    // Export methods
+    // Export methods - Client Side Generation
+    downloadFile(filename: string, content: string) {
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
     exportQuiz() {
-        window.open(this.apiService.getExportUrl('quiz', this.guideId), '_blank');
+        if (!this.guide) return;
+        let content = `Quiz: ${this.guide.title}\n\n`;
+        this.guide.quiz.forEach((q, i) => {
+            content += `${i + 1}. ${q.question}\n`;
+            q.possible_answers.forEach((ans: string, j: number) => {
+                content += `   ${String.fromCharCode(65 + j)}) ${ans}\n`;
+            });
+            content += '\n';
+        });
+
+        // Add Answer Key
+        content += '\n--- Answer Key ---\n';
+        this.guide.quiz.forEach((q, i) => {
+            content += `${i + 1}. ${String.fromCharCode(65 + q.index)}\n`;
+        });
+
+        this.downloadFile(`${this.guide.title}_quiz.txt`, content);
     }
 
     exportFlashcards() {
-        window.open(this.apiService.getExportUrl('flashcards', this.guideId), '_blank');
+        if (!this.guide) return;
+        let content = `Flashcards: ${this.guide.title}\n\n`;
+        this.guide.flash_cards.forEach((card, i) => {
+            content += `Q: ${card[0]}\nA: ${card[1]}\n\n`;
+        });
+        this.downloadFile(`${this.guide.title}_flashcards.txt`, content);
     }
 
     exportSummary() {
-        window.open(this.apiService.getExportUrl('summary', this.guideId), '_blank');
+        if (!this.guide) return;
+        const content = `Study Summary: ${this.guide.title}\n\n${this.guide.summary}`;
+        this.downloadFile(`${this.guide.title}_summary.txt`, content);
     }
 
     // Share
