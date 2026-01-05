@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     try {
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({
-            model: modelName || "gemini-3.0-flash",
+            model: modelName || "gemini-1.5-flash", // Use a stable version as fallback
             generationConfig: action === 'motivation' ? {} : { responseMimeType: "application/json" }
         });
 
@@ -53,14 +53,14 @@ export default async function handler(req, res) {
 
         Return a JSON object with:
         {
-          "title": "Clear Chapter/Topic Title",
+          "title": "Clear Topic Title",
           "summary": "Detailed markdown summary",
-          "flash_cards": [ {"front": "question", "back": "answer"}, ... ],
-          "quiz": [ {"question": "...", "possible_answers": ["...", "..."], "index": 0}, ... ],
-          "study_tips": ["tip 1", "tip 2"],
-          "topics": [ {"name": "Topic A", "difficulty": "Easy/Medium/Hard"} ],
+          "flash_cards": [ {"front": "question", "back": "answer"} ],
+          "quiz": [ {"question": "...", "possible_answers": ["...", "..."], "index": 0} ],
+          "study_tips": ["tip 1"],
+          "topics": [ {"name": "Topic A", "difficulty": "Medium"} ],
           "study_schedule": [
-             {"day_offset": 1, "title": "...", "details": "...", "duration_minutes": 30, "difficulty": "..."}
+             {"day_offset": 1, "title": "...", "details": "...", "duration_minutes": 30, "difficulty": "Medium", "completed": false}
           ]
         }
       `;
@@ -68,23 +68,25 @@ export default async function handler(req, res) {
             const { completedCount, totalCount } = req.body;
             prompt = `
         User has completed ${completedCount} out of ${totalCount} study sessions.
-        Give them a short, punchy, 1-sentence motivational quote or nudge to keep going.
-        Don't be generic. Be witty if possible.
+        Give them a short, punchy, 1-sentence motivational quote.
       `;
         } else if (action === 'replan') {
             const { guideData, missedReason } = req.body;
-            const remainingTasks = (guideData.study_schedule || []).filter((task) => !task.completed);
+            // Only pass necessary schedule data to avoid prompt size issues
+            const currentSchedule = (guideData.study_schedule || []).map(t => ({
+                day_offset: t.day_offset,
+                title: t.title,
+                duration_minutes: t.duration_minutes,
+                completed: !!t.completed
+            }));
+
             prompt = `
         You are an expert study planner. 
-        The user has ${guideData.study_schedule.length} total tasks, and has ${remainingTasks.length} remaining.
-        Their current remaining schedule is: ${JSON.stringify(remainingTasks)}.
-        Reason for missing tasks: '${missedReason}'.
+        The current schedule is: ${JSON.stringify(currentSchedule)}.
+        Reason for needing a change: '${missedReason || 'User missed some sessions'}'.
         
-        Please generate a NEW, updated study schedule that helps them catch up.
-        1. Explain WHY you changed the plan based on their reason.
-        2. Adapt the schedule.
-        
-        Return JSON: {"study_schedule": [...], "plan_explanation": "..." }
+        Generate a NEW study schedule covering the remaining material.
+        Return JSON: {"study_schedule": [{"day_offset": 1, "title": "...", "details": "...", "duration_minutes": 30, "difficulty": "Hard", "completed": false}], "plan_explanation": "Short explain why..." }
       `;
         } else {
             return res.status(400).json({ error: 'Invalid action' });
@@ -99,14 +101,22 @@ export default async function handler(req, res) {
         }
 
         try {
-            const jsonData = JSON.parse(text.replace(/```json/g, '').replace(/```/g, '').trim());
+            // More robust JSON cleaning
+            const cleanJson = text.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
+            const jsonData = JSON.parse(cleanJson);
             return res.status(200).json(jsonData);
         } catch (e) {
-            return res.status(500).json({ error: "AI response was not valid JSON", raw: text });
+            console.error("JSON Parse Error. Raw text:", text);
+            return res.status(500).json({ error: "AI returned invalid format", details: e.message, raw: text });
         }
 
     } catch (error) {
-        console.error('AI Error:', error);
-        return res.status(500).json({ error: 'AI Operation Failed', details: error.message });
+        console.error('AI Error Details:', error);
+        return res.status(500).json({
+            error: 'AI Operation Failed',
+            details: error.message,
+            stack: error.stack,
+            envSet: !!process.env.GEMINI_API_KEY
+        });
     }
 }
