@@ -35,7 +35,9 @@ This project is configured for Vercel.
 2.  Import project in Vercel.
 3.  Framework Preset: **Angular**.
 4.  **Output Directory**: Set this to `dist/frontend-angular/browser`. (Important!)
-5.  Deploy!
+5.  **Environment Variables**: 
+    - Add `FIREBASE_SERVICE_ACCOUNT` with the *entire usage JSON* of your Service Account Key.
+6.  Deploy!
 
 ## 🔑 Setup
 
