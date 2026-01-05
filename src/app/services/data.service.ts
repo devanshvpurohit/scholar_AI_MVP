@@ -60,37 +60,11 @@ export class DataService {
     }
 
     getGuide(id: string): Observable<StudyGuide> {
-        const guideDoc = doc(this.firestore, this.COLLECTION, id);
-        return from(getDoc(guideDoc)).pipe(
-            map(snap => {
-                if (snap.exists()) {
-                    return snap.data() as StudyGuide;
-                } else {
-                    throw new Error("Guide not found");
-                }
-            })
-        );
+        return this.http.get<StudyGuide>(`/api/getGuide?id=${id}`);
     }
 
     getAllGuides(): Observable<{ guides: GuideListItem[] }> {
-        // Query guides where userId == current user
-        const guidesColl = collection(this.firestore, this.COLLECTION);
-        const q = query(guidesColl, where("userId", "==", this.userId));
-
-        return from(getDocs(q)).pipe(
-            map(snapshot => {
-                const guidesList = snapshot.docs.map(doc => {
-                    const data = doc.data() as StudyGuide;
-                    return {
-                        id: data.id,
-                        title: data.title,
-                        filename: data.filename || 'Unknown File',
-                        created_at: data.created_at
-                    };
-                }).sort((a, b) => b.created_at - a.created_at);
-                return { guides: guidesList };
-            })
-        );
+        return this.http.get<{ guides: GuideListItem[] }>(`/api/getGuides?userId=${this.userId}`);
     }
 
     deleteGuide(id: string): Observable<boolean> {
