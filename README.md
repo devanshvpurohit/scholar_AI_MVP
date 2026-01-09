@@ -8,7 +8,7 @@ A powerful, standalone **Angular Single Page Application** that transforms study
 
 - **📂 Serverless Architecture**: Runs entirely in the browser using Angular + Firebase.
 - **🔥 Firebase Integration**: 
-  - **Auth**: Google Sign-In.
+  - **Auth**: Google Sign-In.ownerproof-5632248-1767853354-9c3387978f37
   - **Firestore**: Cloud storage for your study guides (synced across devices).
 - **🤖 Gemini AI Integration**: Direct client-side AI generation (Supports Gemini 1.5 Flash).
 - **📄 Multi-Format Support**: PDF, DOCX, Text, Markdown.
